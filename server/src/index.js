@@ -9,12 +9,24 @@ import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
-await connectDB();
+try {
+  await connectDB();
+} catch (err) {
+  console.error('DB init failed (app will still serve health check):', err.message);
+}
 
 const app = express();
 
-const corsOrigin = config.clientUrls.length > 1 ? config.clientUrls : config.clientUrls[0];
-app.use(cors({ origin: corsOrigin, credentials: true }));
+// CORS: allow CLIENT_URL(s); fallback allows known Vercel frontend so preflight always gets headers
+const allowedOrigins = config.clientUrls.length ? config.clientUrls : ['https://jewellery-store-frontend-nine.vercel.app'];
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(null, false);
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

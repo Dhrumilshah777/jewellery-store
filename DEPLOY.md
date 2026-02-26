@@ -6,6 +6,24 @@ Step-by-step guide to deploy the store to production.
 
 ---
 
+## Troubleshooting: 404 NOT FOUND on Vercel
+
+If you see **"404: NOT_FOUND"** (Vercel’s grey error page) when opening your site:
+
+1. **You’re opening the wrong project**  
+   You have two possible Vercel deployments:
+   - **Frontend (store UI):** Root Directory = **`client`** → this is the URL you should open in the browser (homepage, /products, /cart, etc.).
+   - **Backend (API only):** Root Directory = **`server`** → this URL only serves `/api/health` and API routes; it has no HTML pages, so **any other path returns 404**.
+
+   **Fix:** Open the URL of the project whose Root Directory is **`client`**. If you only have one Vercel project and it’s the API (server), create a **second** project for the frontend and set its Root Directory to **`client`** (see section 3 below).
+
+2. **Root Directory not set**  
+   If the project was imported from the repo root and Root Directory is empty, Vercel won’t find the Next.js app and will return 404.
+
+   **Fix:** In Vercel → Project → **Settings** → **General** → **Root Directory** → set to **`client`** and redeploy.
+
+---
+
 ## 1. MongoDB Atlas
 
 1. Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas) and create an account (or sign in).
