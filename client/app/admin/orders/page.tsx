@@ -3,17 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { adminApi } from '@/lib/api';
-
-type Order = {
-  _id: string;
-  orderNumber: string;
-  status: string;
-  paymentStatus: string;
-  total: number;
-  user?: { name: string; email: string };
-  createdAt: string;
-};
+import { adminApi, type Order } from '@/lib/api';
 
 export default function AdminOrdersPage() {
   const { accessToken } = useAuth();
@@ -29,7 +19,7 @@ export default function AdminOrdersPage() {
     adminApi.orders
       .list(accessToken, params)
       .then((res) => {
-        if (res.success && res.data) setOrders(res.data as Order[]);
+        if (res.success && res.data) setOrders(res.data);
         else setError(res.message || 'Failed to load');
       })
       .finally(() => setLoading(false));
@@ -40,7 +30,7 @@ export default function AdminOrdersPage() {
     setUpdating(orderId);
     await adminApi.orders.updateStatus(accessToken, orderId, { status, trackingNumber });
     const res = await adminApi.orders.list(accessToken, statusFilter ? { status: statusFilter } : undefined);
-    if (res.success && res.data) setOrders(res.data as Order[]);
+    if (res.success && res.data) setOrders(res.data);
     setUpdating(null);
   }
 
@@ -83,7 +73,7 @@ export default function AdminOrdersPage() {
               <tr key={o._id} className="border-b border-gray-100">
                 <td className="px-4 py-3 font-medium text-gray-900">{o.orderNumber}</td>
                 <td className="px-4 py-3 text-sm">
-                  {o.user ? `${(o.user as { name?: string }).name} / ${(o.user as { email?: string }).email}` : '—'}
+                  {o.user ? `${o.user.name} / ${o.user.email}` : '—'}
                 </td>
                 <td className="px-4 py-3 text-sm">₹{o.total.toLocaleString('en-IN')}</td>
                 <td className="px-4 py-3">

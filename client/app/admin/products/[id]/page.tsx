@@ -4,24 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { adminApi } from '@/lib/api';
-import { productsApi } from '@/lib/api';
-
-type Product = {
-  _id: string;
-  name: string;
-  description: string;
-  shortDescription?: string;
-  price: number;
-  category: string;
-  goldPurity?: string | null;
-  productType: string;
-  sku?: string;
-  stock?: { quantity: number; trackInventory: boolean };
-  isActive: boolean;
-  isFeatured: boolean;
-  images?: { url: string }[];
-};
+import { adminApi, productsApi, type Product } from '@/lib/api';
 
 export default function EditProductPage() {
   const params = useParams();
@@ -32,13 +15,13 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [form, setForm] = useState<Partial<Product> & { price?: string }>({});
+  const [form, setForm] = useState<Partial<Omit<Product, 'price'>> & { price?: string }>({});
 
   useEffect(() => {
     if (!accessToken || !id) return;
     productsApi.byId(id).then((res) => {
       if (res.success && res.data) {
-        const p = res.data as Product;
+        const p = res.data;
         setProduct(p);
         setForm({
           name: p.name,

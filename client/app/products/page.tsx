@@ -1,25 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { productsApi } from '@/lib/api';
+import { productsApi, type Product } from '@/lib/api';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 
-type Product = {
-  _id: string;
-  name: string;
-  slug: string;
-  price: number;
-  category: string;
-  goldPurity?: string | null;
-  productType: string;
-  images?: { url: string; alt?: string }[];
-  shortDescription?: string;
-};
-
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +28,7 @@ export default function ProductsPage() {
     productsApi
       .list(params)
       .then((res) => {
-        if (res.success && res.data) setProducts(res.data as Product[]);
+        if (res.success && res.data) setProducts(res.data);
         else setError(res.message || 'Failed to load products');
       })
       .catch(() => setError('Network error'))
@@ -147,5 +135,13 @@ export default function ProductsPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<main className="max-w-7xl mx-auto px-4 py-8"><div className="text-gray-500">Loading...</div></main>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

@@ -4,19 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { adminApi } from '@/lib/api';
-
-type Product = {
-  _id: string;
-  name: string;
-  slug: string;
-  price: number;
-  category: string;
-  goldPurity?: string | null;
-  productType: string;
-  isActive: boolean;
-  images?: { url: string }[];
-};
+import { adminApi, type Product } from '@/lib/api';
 
 export default function AdminProductsPage() {
   const { accessToken } = useAuth();
@@ -29,7 +17,7 @@ export default function AdminProductsPage() {
     adminApi.products
       .list(accessToken)
       .then((res) => {
-        if (res.success && res.data) setProducts(res.data as Product[]);
+        if (res.success && res.data) setProducts(res.data);
         else setError(res.message || 'Failed to load');
       })
       .finally(() => setLoading(false));

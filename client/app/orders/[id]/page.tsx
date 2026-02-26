@@ -4,28 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ordersApi } from '@/lib/api';
-
-type OrderItem = { name: string; quantity: number; price: number; total: number };
-type Order = {
-  _id: string;
-  orderNumber: string;
-  status: string;
-  paymentStatus: string;
-  subtotal: number;
-  shippingCharge: number;
-  total: number;
-  items: OrderItem[];
-  shippingAddress: { fullName: string; phone: string; addressLine1: string; addressLine2?: string; city: string; state: string; pincode: string };
-  createdAt: string;
-  trackingNumber?: string;
-};
+import { ordersApi, type OrderDetail } from '@/lib/api';
 
 export default function OrderDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { isAuthenticated, accessToken } = useAuth();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -35,7 +20,7 @@ export default function OrderDetailPage() {
       return;
     }
     ordersApi.get(accessToken, id).then((res) => {
-      if (res.success && res.data) setOrder(res.data as Order);
+      if (res.success && res.data) setOrder(res.data);
       else setError(res.message || 'Order not found');
     }).finally(() => setLoading(false));
   }, [isAuthenticated, accessToken, id]);

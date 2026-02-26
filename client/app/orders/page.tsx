@@ -3,16 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ordersApi } from '@/lib/api';
-
-type Order = {
-  _id: string;
-  orderNumber: string;
-  status: string;
-  paymentStatus: string;
-  total: number;
-  createdAt: string;
-};
+import { ordersApi, type Order } from '@/lib/api';
 
 export default function MyOrdersPage() {
   const { isAuthenticated, accessToken } = useAuth();
@@ -28,7 +19,7 @@ export default function MyOrdersPage() {
     ordersApi
       .list(accessToken)
       .then((res) => {
-        if (res.success && res.data) setOrders(res.data as Order[]);
+        if (res.success && res.data) setOrders(res.data);
         else setError(res.message || 'Failed to load orders');
       })
       .finally(() => setLoading(false));

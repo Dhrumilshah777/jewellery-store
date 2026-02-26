@@ -4,24 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { productsApi } from '@/lib/api';
+import { productsApi, cartApi, type Product } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { cartApi } from '@/lib/api';
-
-type Product = {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  shortDescription?: string;
-  price: number;
-  compareAtPrice?: number | null;
-  category: string;
-  goldPurity?: string | null;
-  productType: string;
-  images?: { url: string; alt?: string }[];
-  stock?: { quantity: number; trackInventory: boolean };
-};
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -40,7 +24,7 @@ export default function ProductDetailPage() {
     productsApi
       .bySlug(slug)
       .then((res) => {
-        if (res.success && res.data) setProduct(res.data as Product);
+        if (res.success && res.data) setProduct(res.data);
         else setError(res.message || 'Product not found');
       })
       .catch(() => setError('Network error'))
