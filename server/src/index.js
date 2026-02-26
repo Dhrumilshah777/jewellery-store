@@ -17,16 +17,34 @@ try {
 
 const app = express();
 
-// CORS: allow CLIENT_URL(s); fallback allows known Vercel frontend so preflight always gets headers
-const allowedOrigins = config.clientUrls.length ? config.clientUrls : ['https://jewellery-store-frontend-nine.vercel.app'];
+// CORS: always allow the known frontend; also allow CLIENT_URL(s) from env
+const frontendOrigin = 'https://jewellery-store-frontend-nine.vercel.app';
+const allowedOrigins = [
+  frontendOrigin,
+  ...(config.clientUrls || []).filter((o) => o && o !== frontendOrigin),
+];
 const corsOptions = {
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
     return cb(null, false);
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
+// Ensure preflight OPTIONS gets CORS headers (some serverless environments need this)
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(204);
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
